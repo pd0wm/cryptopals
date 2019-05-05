@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 hex = "*"
 base64 = "*"
+openssl = { version = "0.10", features = ["vendored"] }

@@ -1,15 +1,17 @@
 extern crate hex;
 extern crate base64;
 
-
+use std::str;
 use std::fs;
-
 mod helpers;
+
+use openssl::symm::{decrypt, Cipher};
+
 
 fn main() {
     // Challenge 1
     let input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d".to_string();
-    println!("{}", helpers::conversion::hex_to_base64(input));
+    println!("Challenge 1: {}", helpers::conversion::hex_to_base64(input));
 
     // Challenge 2
     let input1 = "1c0111001f010100061a024b53535009181c".to_string();
@@ -21,13 +23,13 @@ fn main() {
     let result = helpers::xor::xor_vec8(&input1, &input2);
     let result = hex::encode(result);
 
-    println!("{}", result);
+    println!("Challenge 2: {}", result);
 
     // Challenge 3
     let input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736".to_string();
     let input = hex::decode(input).unwrap();
     let result = helpers::xor::break_single_byte(&input);
-    println!("{}", result);
+    println!("Challenge 3: {}", result);
 
 
     // Challenge 4
@@ -49,7 +51,7 @@ fn main() {
         }
     }
 
-    println!("{}", best_result);
+    println!("Challenge 4:{}", best_result);
 
     // Challenge 5
     let input = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
@@ -58,14 +60,12 @@ fn main() {
 
     let result = helpers::xor::xor_vec8(&input, &key);
     let result = hex::encode(result);
-    println!("{}", result);
+    println!("Challenge 5: {}", result);
 
 
     // Challenge 6
-    let input = fs::read_to_string("assets/6.txt")
-        .expect("Something went wrong reading the input for challenge 6");
-    let input = input.replace("\n", "");
-    let input = base64::decode(&input).unwrap();
+    let input = helpers::read_file_base64("assets/6.txt".to_string());
+
     let mut best_keysize = 0;
     let mut best_score : f64 = std::f64::MAX;
 
@@ -87,8 +87,6 @@ fn main() {
             best_keysize = keysize;
         }
     }
-    println!("Keysize: {}", best_keysize);
-
     let mut key : String = String::new();
 
     for i in 0..best_keysize {
@@ -96,6 +94,18 @@ fn main() {
         let x : char = helpers::xor::find_key_single_byte(&cyphertext) as char;
         key.push(x)
     }
-    println!("Key: {}", key);
+    println!("Challenge 6: {}", key);
+
+
+    // Challenge 7
+    let input = helpers::read_file_base64("assets/7.txt".to_string());
+    let key = b"YELLOW SUBMARINE";
+
+    let cipher = Cipher::aes_128_ecb();
+    let plaintext = decrypt(cipher, key, None, &input).unwrap();
+    let plaintext = str::from_utf8(&plaintext).unwrap();
+
+    let line = plaintext.split('\n').next().unwrap();
+    println!("Challenge 7: {}", line);
 
 }
