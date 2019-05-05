@@ -108,4 +108,37 @@ fn main() {
     let line = plaintext.split('\n').next().unwrap();
     println!("Challenge 7: {}", line);
 
+    // Challenge 8
+    let input = fs::read_to_string("assets/8.txt").unwrap();
+    let mut max_repeats = 0;
+    let mut max_i = 0;
+    let block_size = 16;
+
+    for (i, line) in input.split('\n').enumerate() {
+        let line = hex::decode(line).unwrap();
+        let mut repeats = 0;
+
+        if line.len() == 0 {
+            continue;
+        }
+
+        // TODO: better duplication detection
+        for block_1 in 0..10 {
+            for block_2 in 0..block_1 {
+                let block_1 = line.chunks(block_size).nth(block_1);
+                let block_2 = line.chunks(block_size).nth(block_2);
+
+                if block_1 == block_2 {
+                    repeats += 1;
+                }
+            }
+        }
+
+        if repeats > max_repeats {
+            max_repeats = repeats;
+            max_i = i;
+        }
+    }
+
+    println!("Challenge 8: {}", max_i);
 }
